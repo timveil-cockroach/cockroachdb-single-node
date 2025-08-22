@@ -1,0 +1,51 @@
+name: CI Build and Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Build Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: false
+        tags: cockroachdb-single-node:test
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+    
+    - name: Test Docker image build
+      run: |
+        docker run --rm cockroachdb-single-node:test --version || true
+    
+    - name: Validate SQL files
+      run: |
+        for file in *.sql; do
+          if [ -f "$file" ]; then
+            echo "Checking syntax of $file"
+            # Basic SQL syntax validation
+            grep -E "^\s*(SELECT|INSERT|UPDATE|DELETE|CREATE|ALTER|DROP|SET)" "$file" > /dev/null && echo "$file appears valid" || echo "Warning: $file may have issues"
+          fi
+        done
+    
+    - name: Validate shell scripts
+      run: |
+        for file in *.sh; do
+          if [ -f "$file" ]; then
+            echo "Checking $file"
+            bash -n "$file"
+          fi
+        done

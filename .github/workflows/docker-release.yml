@@ -59,6 +59,7 @@ jobs:
           type=sha,prefix={{branch}}-
     
     - name: Build and push Docker image
+      id: push
       uses: docker/build-push-action@v5
       with:
         context: .

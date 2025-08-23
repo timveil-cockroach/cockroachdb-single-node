@@ -43,6 +43,12 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
     
+    - name: Generate version
+      id: version
+      run: |
+        echo "date=$(date +'%Y.%m.%d')" >> $GITHUB_OUTPUT
+        echo "full=$(date +'%Y.%m.%d')-${GITHUB_SHA:0:7}" >> $GITHUB_OUTPUT
+    
     - name: Extract metadata
       id: meta
       uses: docker/metadata-action@v5
@@ -51,13 +57,9 @@ jobs:
           ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           ${{ github.event_name == 'release' && 'timveil/cockroachdb-single-node' || '' }}
         tags: |
-          type=ref,event=branch
-          type=ref,event=pr
-          type=semver,pattern={{version}}
-          type=semver,pattern={{major}}.{{minor}}
-          type=semver,pattern={{major}}
-          type=raw,value=latest,enable={{is_default_branch}}
-          type=sha,prefix={{branch}}-
+          type=raw,value=latest
+          type=raw,value=${{ steps.version.outputs.date }}
+          type=raw,value=${{ steps.version.outputs.full }}
     
     - name: Build and push Docker image
       id: push

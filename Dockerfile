@@ -5,8 +5,12 @@ LABEL maintainer="tjveil@gmail.com" \
       org.opencontainers.image.description="Single-node CockroachDB for CI/CD and testing" \
       org.opencontainers.image.licenses="Apache-2.0"
 
-COPY --chmod=755 init.sh /cockroach/
-COPY logs.yaml optimizations.sql /cockroach/
+# Copy files with appropriate ownership for the cockroach user (UID 1000)
+COPY --chown=1000:1000 --chmod=755 init.sh /cockroach/
+COPY --chown=1000:1000 logs.yaml optimizations.sql /cockroach/
+
+# Ensure we're using the non-root user from the base image
+USER 1000
 
 WORKDIR /cockroach/
 

@@ -22,9 +22,10 @@ docker run -d -it -p 8080:8080 -p 26257:26257 -e "DATABASE_NAME=test" -e "MEMORY
 docker run -d -it -p 8080:8080 -p 26257:26257 timveil/cockroachdb-single-node:latest
 ```
 
-### Publishing to Docker Hub
+### Testing Docker Image Health
 ```bash
-docker push timveil/cockroachdb-single-node:latest
+# Check if CockroachDB is responding
+docker exec <container_id> /cockroach/cockroach sql --insecure --execute="SELECT 1"
 ```
 
 ### Validating Shell Scripts
@@ -36,7 +37,12 @@ bash -n init.sh
 
 The project consists of:
 
-1. **Dockerfile**: Extends `cockroachdb/cockroach:latest`, adds initialization scripts, and exposes ports 8080 (admin UI) and 26257 (SQL)
+1. **Dockerfile**: 
+   - Extends `cockroachdb/cockroach:latest`
+   - Runs as non-root user (UID 1000) for security
+   - Includes health check for container monitoring
+   - Exposes ports 8080 (admin UI) and 26257 (SQL)
+   - Uses OCI-compliant labels for metadata
 
 2. **init.sh**: Entry point script that:
    - Starts CockroachDB in single-node mode with optional in-memory storage (via `MEMORY_SIZE` env var)
@@ -44,7 +50,11 @@ The project consists of:
    - Creates a database if `DATABASE_NAME` env var is provided
    - Tails the CockroachDB logs to keep the container running
 
-3. **optimizations.sql**: Contains cluster settings optimized for testing environments, including disabled synchronization, reduced intervals, and shorter TTLs
+3. **optimizations.sql**: Contains cluster settings optimized for testing environments:
+   - Disables raft log synchronization for faster operations
+   - Reduces job registry intervals
+   - Shortens garbage collection TTL
+   - Disables automatic statistics collection
 
 4. **logs.yaml**: CockroachDB logging configuration with various channels for different log types
 
@@ -55,12 +65,23 @@ The project consists of:
 
 ## CI/CD Integration
 
-The image is designed for GitHub Actions service containers. It automatically builds and publishes to:
-- GitHub Container Registry (ghcr.io) on every push to main
-- Docker Hub (timveil/cockroachdb-single-node) on releases
+### Docker Registry
+The image automatically builds and publishes to Docker Hub only:
+- `timveil/cockroachdb-single-node:latest` - always latest build
+- `timveil/cockroachdb-single-node:2024.08.23` - date-based tag
+- `timveil/cockroachdb-single-node:2024.08.23-abc1234` - date + commit SHA
 
-GitHub Actions workflows handle:
-- CI builds and tests on PRs and pushes
-- Docker image releases with multi-platform support (linux/amd64, linux/arm64)
-- Security scanning via Docker Scout
-- Automated dependency updates via Dependabot
+### GitHub Actions Workflows
+- **CI** (`.github/workflows/ci.yml`): Builds and tests on PRs and pushes
+- **Release** (`.github/workflows/docker-release.yml`): Multi-platform builds and Docker Hub publishing
+- **Dependabot** (`.github/dependabot.yml`): Automated dependency updates
+
+### Required Secrets
+- `DOCKER_USERNAME`: Docker Hub username
+- `DOCKER_PASSWORD`: Docker Hub password/token
+
+## Security Features
+- Runs as non-root user (cockroach user, UID 1000)
+- Generates SBOM and provenance attestations
+- Multi-platform builds (linux/amd64, linux/arm64)
+- Built-in health checks

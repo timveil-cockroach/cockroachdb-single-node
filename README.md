@@ -1,7 +1,7 @@
 # CockroachDB Single Node
 
-[![CI Build and Test](https://github.com/timveil/cockroachdb-single-node/actions/workflows/ci.yml/badge.svg)](https://github.com/timveil/cockroachdb-single-node/actions/workflows/ci.yml)
-[![Release Docker Image](https://github.com/timveil/cockroachdb-single-node/actions/workflows/docker-release.yml/badge.svg)](https://github.com/timveil/cockroachdb-single-node/actions/workflows/docker-release.yml)
+[![CI Build and Test](https://github.com/timveil-cockroach/cockroachdb-single-node/actions/workflows/ci.yml/badge.svg)](https://github.com/timveil-cockroach/cockroachdb-single-node/actions/workflows/ci.yml)
+[![Release Docker Image](https://github.com/timveil-cockroach/cockroachdb-single-node/actions/workflows/docker-release.yml/badge.svg)](https://github.com/timveil-cockroach/cockroachdb-single-node/actions/workflows/docker-release.yml)
 [![Docker Hub](https://img.shields.io/docker/pulls/timveil/cockroachdb-single-node)](https://hub.docker.com/repository/docker/timveil/cockroachdb-single-node)
 
 A lightweight [CockroachDB](https://www.cockroachlabs.com/) Docker image optimized for CI/CD pipelines and functional testing. This image extends the official CockroachDB Docker image with automatic single-node startup, optional database creation, and performance optimizations for testing environments.
@@ -102,7 +102,7 @@ This image includes several CockroachDB settings optimized for testing environme
 
 ```bash
 # Clone the repository
-git clone https://github.com/timveil/cockroachdb-single-node.git
+git clone https://github.com/timveil-cockroach/cockroachdb-single-node.git
 cd cockroachdb-single-node
 
 # Build the image

@@ -15,9 +15,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write
-      id-token: write
-      attestations: write
     
     steps:
     - name: Checkout code
@@ -62,9 +59,3 @@ jobs:
         provenance: true
         sbom: true
     
-    - name: Generate artifact attestation
-      uses: actions/attest-build-provenance@v2
-      with:
-        subject-name: timveil/cockroachdb-single-node
-        subject-digest: ${{ steps.push.outputs.digest }}
-        push-to-registry: true
